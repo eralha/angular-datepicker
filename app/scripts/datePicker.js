@@ -105,6 +105,11 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         if (nextView) {
           scope.setView(nextView);
         }
+
+        if(!nextView && attrs.autoClose === 'true'){
+          element.addClass('hidden');
+          scope.$emit('hidePicker');
+        }
       };
 
       function update() {
@@ -140,7 +145,7 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         if (scope.view !== 'date') {
           return scope.view;
         }
-        return scope.model ? scope.model.getMonth() : null;
+        return scope.date ? scope.date.getMonth() : null;
       }
 
 

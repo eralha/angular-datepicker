@@ -12,6 +12,7 @@ Module.constant('dateTimeConfig', {
         'date-picker="' + attrs.ngModel + '" ' +
         (attrs.view ? 'view="' + attrs.view + '" ' : '') +
         (attrs.maxView ? 'max-view="' + attrs.maxView + '" ' : '') +
+        (attrs.autoClose ? 'auto-close="' + attrs.autoClose + '" ' : '') +
         (attrs.template ? 'template="' + attrs.template + '" ' : '') +
         (attrs.minView ? 'min-view="' + attrs.minView + '" ' : '') +
         (attrs.partial ? 'partial="' + attrs.partial + '" ' : '') +
@@ -110,6 +111,10 @@ Module.directive('dateTime', ['$compile', '$document', '$filter', 'dateTimeConfi
           if (dismiss && views[views.length - 1] === view) {
             clear();
           }
+        });
+
+        scope.$on('hidePicker', function () {
+          element.triggerHandler('blur');
         });
 
         scope.$on('$destroy', clear);

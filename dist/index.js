@@ -107,6 +107,11 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         if (nextView) {
           scope.setView(nextView);
         }
+
+        if(!nextView && attrs.autoClose === 'true'){
+          element.addClass('hidden');
+          scope.$emit('hidePicker');
+        }
       };
 
       function update() {
@@ -142,7 +147,7 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
         if (scope.view !== 'date') {
           return scope.view;
         }
-        return scope.model ? scope.model.getMonth() : null;
+        return scope.date ? scope.date.getMonth() : null;
       }
 
 
@@ -318,30 +323,37 @@ angular.module('datePicker').factory('datePickerUtils', function(){
     },
     isAfter : function(model, date) {
       model = (model !== undefined) ? new Date(model) : model;
+      date = new Date(date);
       return model && model.getTime() <= date.getTime();
     },
     isBefore : function(model, date) {
       model = (model !== undefined) ? new Date(model) : model;
+      date = new Date(date);
       return model.getTime() >= date.getTime();
     },
     isSameYear :   function(model, date) {
       model = (model !== undefined) ? new Date(model) : model;
+      date = new Date(date);
       return model && model.getFullYear() === date.getFullYear();
     },
     isSameMonth : function(model, date) {
       model = (model !== undefined) ? new Date(model) : model;
+      date = new Date(date);
       return this.isSameYear(model, date) && model.getMonth() === date.getMonth();
     },
     isSameDay : function(model, date) {
       model = (model !== undefined) ? new Date(model) : model;
+      date = new Date(date);
       return this.isSameMonth(model, date) && model.getDate() === date.getDate();
     },
     isSameHour : function(model, date) {
       model = (model !== undefined) ? new Date(model) : model;
+      date = new Date(date);
       return this.isSameDay(model, date) && model.getHours() === date.getHours();
     },
     isSameMinutes : function(model, date) {
       model = (model !== undefined) ? new Date(model) : model;
+      date = new Date(date);
       return this.isSameHour(model, date) && model.getMinutes() === date.getMinutes();
     }
   };
@@ -358,6 +370,10 @@ Module.directive('dateRange', function () {
       end: '='
     },
     link: function (scope, element, attrs) {
+
+      scope.start = new Date(scope.start);
+      scope.end = new Date(scope.end);
+
       attrs.$observe('disabled', function(isDisabled){
           scope.disableDatePickers = !!isDisabled;
         });
@@ -389,9 +405,11 @@ Module.constant('dateTimeConfig', {
         'date-picker="' + attrs.ngModel + '" ' +
         (attrs.view ? 'view="' + attrs.view + '" ' : '') +
         (attrs.maxView ? 'max-view="' + attrs.maxView + '" ' : '') +
+        (attrs.autoClose ? 'auto-close="' + attrs.autoClose + '" ' : '') +
         (attrs.template ? 'template="' + attrs.template + '" ' : '') +
         (attrs.minView ? 'min-view="' + attrs.minView + '" ' : '') +
         (attrs.partial ? 'partial="' + attrs.partial + '" ' : '') +
+        (attrs.step ? 'step="' + attrs.step + '" ' : '') +
         'class="dropdown-menu"></div>';
   },
   format: 'yyyy-MM-dd HH:mm',
@@ -486,6 +504,10 @@ Module.directive('dateTime', ['$compile', '$document', '$filter', 'dateTimeConfi
           if (dismiss && views[views.length - 1] === view) {
             clear();
           }
+        });
+
+        scope.$on('hidePicker', function () {
+          element.triggerHandler('blur');
         });
 
         scope.$on('$destroy', clear);
