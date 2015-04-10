@@ -2,7 +2,7 @@
 
 ## WIP
 
-<a href="https://travis-ci.org/eralha/angular-date-translations" target="_blank">
+<a href="https://travis-ci.org/eralha/angular-datepicker" target="_blank">
 <img src="https://travis-ci.org/eralha/angular-datepicker.svg" /></a>
 
 #### Requirements
