@@ -52,6 +52,33 @@ Module.directive('datePicker', ['datePickerConfig', 'datePickerUtils', function 
       var step = parseInt(attrs.step || datePickerConfig.step, 10);
       var partial = !!attrs.partial;
 
+      //if ngModel, we can add min and max validators
+      if(ngModel)
+      {
+        if (angular.isDefined(attrs.minDate)) {
+          var minVal;
+          ngModel.$validators.min = function (value) {
+            return !datePickerUtils.isValidDate(value) || angular.isUndefined(minVal) || value >= minVal;
+          };
+          attrs.$observe('minDate', function (val) {
+            minVal = new Date(val);
+            ngModel.$validate();
+          });
+        }
+
+        if (angular.isDefined(attrs.maxDate)) {
+          var maxVal;
+          ngModel.$validators.max = function (value) {
+            return !datePickerUtils.isValidDate(value) || angular.isUndefined(maxVal) || value <= maxVal;
+          };
+          attrs.$observe('maxDate', function (val) {
+            maxVal = new Date(val);
+            ngModel.$validate();
+          });
+        }
+      }
+      //end min, max date validator
+
       /** @namespace attrs.minView, attrs.maxView */
       scope.views =scope.views.slice(
         scope.views.indexOf(attrs.maxView || 'year'),
@@ -355,6 +382,10 @@ angular.module('datePicker').factory('datePickerUtils', function(){
       model = (model !== undefined) ? new Date(model) : model;
       date = new Date(date);
       return this.isSameHour(model, date) && model.getMinutes() === date.getMinutes();
+    },
+    isValidDate : function(value) {
+      // Invalid Date: getTime() returns NaN
+      return value && !(value.getTime && value.getTime() !== value.getTime());
     }
   };
 });
@@ -371,8 +402,11 @@ Module.directive('dateRange', function () {
     },
     link: function (scope, element, attrs) {
 
-      scope.start = new Date(scope.start);
-      scope.end = new Date(scope.end);
+      /*
+       * If no date is set on scope, set current date from user system
+       */
+      scope.start = new Date(scope.start || new Date());
+      scope.end = new Date(scope.end || new Date());
 
       attrs.$observe('disabled', function(isDisabled){
           scope.disableDatePickers = !!isDisabled;
@@ -410,7 +444,7 @@ Module.constant('dateTimeConfig', {
         (attrs.minView ? 'min-view="' + attrs.minView + '" ' : '') +
         (attrs.partial ? 'partial="' + attrs.partial + '" ' : '') +
         (attrs.step ? 'step="' + attrs.step + '" ' : '') +
-        'class="dropdown-menu"></div>';
+        'class="date-picker-date-time"></div>';
   },
   format: 'yyyy-MM-dd HH:mm',
   views: ['date', 'year', 'month', 'hours', 'minutes'],
@@ -428,7 +462,8 @@ Module.directive('dateTimeAppend', function () {
   };
 });
 
-Module.directive('dateTime', ['$compile', '$document', '$filter', 'dateTimeConfig', '$parse', function ($compile, $document, $filter, dateTimeConfig, $parse) {
+Module.directive('dateTime', ['$compile', '$document', '$filter', 'dateTimeConfig', '$parse', 'datePickerUtils',
+                function ($compile, $document, $filter, dateTimeConfig, $parse, datePickerUtils) {
   var body = $document.find('body');
   var dateFilter = $filter('date');
 
@@ -464,6 +499,30 @@ Module.directive('dateTime', ['$compile', '$document', '$filter', 'dateTimeConfi
       ngModel.$formatters.push(formatter);
       ngModel.$parsers.unshift(parser);
 
+
+      //min. max date validators
+      if (angular.isDefined(attrs.minDate)) {
+        var minVal;
+        ngModel.$validators.min = function (value) {
+            return !datePickerUtils.isValidDate(value) || angular.isUndefined(minVal) || value >= minVal;
+          };
+        attrs.$observe('minDate', function (val) {
+            minVal = new Date(val);
+            ngModel.$validate();
+          });
+      }
+
+      if (angular.isDefined(attrs.maxDate)) {
+        var maxVal;
+        ngModel.$validators.max = function (value) {
+            return !datePickerUtils.isValidDate(value) || angular.isUndefined(maxVal) || value <= maxVal;
+          };
+        attrs.$observe('maxDate', function (val) {
+            maxVal = new Date(val);
+            ngModel.$validate();
+          });
+      }
+      //end min, max date validator
 
       var template = dateTimeConfig.template(attrs);
 
