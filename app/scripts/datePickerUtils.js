@@ -1,66 +1,81 @@
 'use strict';
 
 angular.module('datePicker').factory('datePickerUtils', function(){
+  var createNewDate = function(year, month, day, hour, minute) {
+    // without any arguments, the default date will be 1899-12-31T00:00:00.000Z
+    return new Date(Date.UTC(year | 0, month | 0, day | 0, hour | 0, minute | 0));
+  };
   return {
     getVisibleMinutes : function(date, step) {
       date = new Date(date || new Date());
-      date = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours());
+      var year = date.getFullYear();
+      var month = date.getMonth();
+      var day = date.getDate();
+      var hour = date.getUTCHours();
       var minutes = [];
-      var stop = date.getTime() + 60 * 60 * 1000;
-      while (date.getTime() < stop) {
-        minutes.push(date);
-        date = new Date(date.getTime() + step * 60 * 1000);
+      var minute, pushedDate;
+      for (minute = 0 ; minute < 60 ; minute += step) {
+        pushedDate = createNewDate(year, month, day, hour, minute);
+        minutes.push(pushedDate);
       }
       return minutes;
     },
     getVisibleWeeks : function(date) {
       date = new Date(date || new Date());
-      var startMonth = date.getMonth(), startYear = date.getYear();
+      var startMonth = date.getMonth();
+      var startYear = date.getYear();
+      // set date to start of the week
       date.setDate(1);
-      date.setHours(0);
-      date.setMinutes(0);
-      date.setSeconds(0);
-      date.setMilliseconds(0);
 
       if (date.getDay() === 0) {
+        // day is sunday, let's get back to the previous week
         date.setDate(-5);
       } else {
+        // day is not sunday, let's get back to the start of the week
         date.setDate(date.getDate() - (date.getDay() - 1));
       }
       if (date.getDate() === 1) {
+        // day is monday, let's get back to the previous week
         date.setDate(-6);
       }
 
       var weeks = [];
+      var week;
       while (weeks.length < 6) {
-        /*jshint -W116 */
-        if(date.getYear()=== startYear && date.getMonth() > startMonth) break;
-        var week = [];
-        for (var i = 0; i < 7; i++) {
-          week.push(new Date(date));
-          date.setDate(date.getDate() + 1);
+        if (date.getYear() === startYear && date.getMonth() > startMonth) {
+          break;
         }
+        week = this.getDaysOfWeek(date);
         weeks.push(week);
+        date.setDate(date.getDate() + 7);
       }
       return weeks;
     },
     getVisibleYears : function(date) {
-      var years = [];
       date = new Date(date || new Date());
       date.setFullYear(date.getFullYear() - (date.getFullYear() % 10));
+      var year = date.getFullYear();
+      var years = [];
+      var pushedDate;
       for (var i = 0; i < 12; i++) {
-        years.push(new Date(date.getFullYear() + (i - 1), 0, 1));
+        pushedDate = createNewDate(year);
+        years.push(pushedDate);
+        year++;
       }
       return years;
     },
     getDaysOfWeek : function(date) {
       date = new Date(date || new Date());
-      date = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       date.setDate(date.getDate() - (date.getDay() - 1));
+      var year = date.getFullYear();
+      var month = date.getMonth();
+      var day = date.getDate();
       var days = [];
+      var pushedDate;
       for (var i = 0; i < 7; i++) {
-        days.push(new Date(date));
-        date.setDate(date.getDate() + 1);
+        pushedDate = createNewDate(year, month, day);
+        days.push(pushedDate);
+        day++;
       }
       return days;
     },
@@ -68,33 +83,35 @@ angular.module('datePicker').factory('datePickerUtils', function(){
       date = new Date(date || new Date());
       var year = date.getFullYear();
       var months = [];
+      var pushedDate;
       for (var month = 0; month < 12; month++) {
-        months.push(new Date(year, month, 1));
+        pushedDate = createNewDate(year, month, 1);
+        months.push(pushedDate);
       }
       return months;
     },
     getVisibleHours : function(date) {
       date = new Date(date || new Date());
-      date.setHours(0);
-      date.setMinutes(0);
-      date.setSeconds(0);
-      date.setMilliseconds(0);
+      var year = date.getFullYear();
+      var month = date.getMonth();
+      var day = date.getDate();
       var hours = [];
-      for (var i = 0; i < 24; i++) {
-        hours.push(date);
-        date = new Date(date.getTime() + 60 * 60 * 1000);
+      var hour, pushedDate;
+      for (hour = 0 ; hour < 24 ; hour++) {
+        pushedDate = createNewDate(year, month, day, hour);
+        hours.push(pushedDate);
       }
       return hours;
     },
     isAfter : function(model, date) {
       model = (model !== undefined) ? new Date(model) : model;
       date = new Date(date);
-      return model && model.getTime() <= date.getTime();
+      return model && model.getTime() >= date.getTime();
     },
     isBefore : function(model, date) {
       model = (model !== undefined) ? new Date(model) : model;
       date = new Date(date);
-      return model.getTime() >= date.getTime();
+      return model.getTime() <= date.getTime();
     },
     isSameYear :   function(model, date) {
       model = (model !== undefined) ? new Date(model) : model;

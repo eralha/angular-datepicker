@@ -198,10 +198,16 @@ module.exports = function (grunt) {
         src: ['<%= yeoman.tmp %>/{,*/}*.css'],
         dest: '<%= yeoman.dist %>/index.css'
       }
+    },
+
+    bump : {
+      options : {
+        files : [ 'package.json', 'bower.json' ],
+        commitFiles : [ 'package.json', 'bower.json' ],
+        pushTo : 'origin'
+      }
     }
   });
-
-  grunt.renameTask('regarde', 'watch');
 
   grunt.registerTask('server', [
     'clean:server',

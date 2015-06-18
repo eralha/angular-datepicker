@@ -1,7 +1,7 @@
 describe('Test date Picker Utils', function(){
   var utils, constants;
 
-  var model = new Date('2014-06-29T19:00:00.000Z');
+  var model = new Date('2014-06-29T19:00:00.000Z'); // sunday
 
   beforeEach(angular.mock.module('datePicker'));
 
@@ -17,9 +17,10 @@ describe('Test date Picker Utils', function(){
   });
 
   it('get visible mins provided date', function(){
-    var start = new Date('2014-06-29T19:00:00.000Z');
-    var end = new Date('2014-06-29T19:55:00.000Z');
-    var mins = utils.getVisibleMinutes(start, constants.step);
+    var start = new Date('2014-06-29T19:00:00.000Z'); // sunday
+    var end = new Date('2014-06-29T19:55:00.000Z'); // sunday
+    var chosen = new Date('2014-06-29T19:00:00.000Z'); // sunday
+    var mins = utils.getVisibleMinutes(chosen, constants.step);
 
     expect(mins).toBeDefined();
     expect(mins[0]).toEqual(start);
@@ -33,9 +34,9 @@ describe('Test date Picker Utils', function(){
   });
 
   it('get visible weeks provided date', function(){
-    var start = new Date('2014-05-26T07:00:00.000Z');
-    var end = new Date('2014-07-06T07:00:00.000Z');
-    var chosen = new Date('2014-06-29T19:00:00.000Z');
+    var start = new Date('2014-05-26T00:00:00.000Z'); // monday
+    var end = new Date('2014-07-06T00:00:00.000Z');  // sunday
+    var chosen = new Date('2014-06-29T19:00:00.000Z'); // sunday
     var weeks = utils.getVisibleWeeks(chosen, constants.step);
 
     expect(weeks).toBeDefined();
@@ -50,9 +51,9 @@ describe('Test date Picker Utils', function(){
   });
 
   it('get visible years provided date', function(){
-    var start = new Date('2009-01-01T08:00:00.000Z');
-    var end = new Date('2020-01-01T08:00:00.000Z');
-    var chosen = new Date('2014-06-29T19:00:00.000Z');
+    var start = new Date('2009-12-31T00:00:00.000Z'); // thursday
+    var end = new Date('2020-12-31T00:00:00.000Z'); // wednesday
+    var chosen = new Date('2014-06-29T19:00:00.000Z'); // sunday
     var years = utils.getVisibleYears(chosen, constants.step);
 
     expect(years).toBeDefined();
@@ -67,8 +68,8 @@ describe('Test date Picker Utils', function(){
   });
 
   it('get days of week provided date', function(){
-    var start = new Date('2014-05-26T07:00:00.000Z');
-    var end = new Date('2014-06-01T07:00:00.000Z');
+    var start = new Date('2014-05-26T00:00:00.000Z'); // monday
+    var end = new Date('2014-06-01T00:00:00.000Z'); // sunday
     var days = utils.getDaysOfWeek(start);
 
     expect(days).toBeDefined();
@@ -83,9 +84,9 @@ describe('Test date Picker Utils', function(){
   });
 
   it('get default months provided date', function(){
-    var start = new Date('2014-01-01T08:00:00.000Z');
-    var end = new Date('2014-12-01T08:00:00.000Z');
-    var chosen = new Date('2014-06-29T19:00:00.000Z');
+    var start = new Date('2014-01-01T00:00:00.000Z'); // wednesday
+    var end = new Date('2014-12-01T00:00:00.000Z'); // monday
+    var chosen = new Date('2014-06-29T19:00:00.000Z'); // sunday
     var months = utils.getVisibleMonths(chosen);
 
     expect(months).toBeDefined();
@@ -100,9 +101,9 @@ describe('Test date Picker Utils', function(){
   });
 
   it('get default hours provided date', function(){
-    var start = new Date('2014-06-29T07:00:00.000Z');
-    var end = new Date('2014-06-30T06:00:00.000Z');
-    var chosen = new Date('2014-06-29T19:00:00.000Z');
+    var start = new Date('2014-06-29T00:00:00.000Z'); // sunday
+    var end = new Date('2014-06-29T23:00:00.000Z'); // sunday
+    var chosen = new Date('2014-06-29T19:00:00.000Z'); // sunday
     var hours = utils.getVisibleHours(chosen);
 
     expect(hours).toBeDefined();
@@ -111,21 +112,23 @@ describe('Test date Picker Utils', function(){
   });
 
   it('model is after date', function(){
-    var dateAfter =  new Date('2014-06-29T20:00:00.000Z');
-
-    expect(utils.isAfter(model, dateAfter)).toBe(true);
-    expect(utils.isBefore(model, dateAfter)).toBe(false);
-  });
-
-  it('model is before date', function(){
-    var dateAfter =  new Date('2014-06-29T18:00:00.000Z');
+    // model is 19h, dateAfter is 20h, so model should be before and not after
+    var dateAfter =  new Date('2014-06-29T20:00:00.000Z'); // sunday
 
     expect(utils.isAfter(model, dateAfter)).toBe(false);
     expect(utils.isBefore(model, dateAfter)).toBe(true);
   });
 
+  it('model is before date', function(){
+    // model is 19h, dateAfter is 18h, so model should be after and not before
+    var dateAfter =  new Date('2014-06-29T18:00:00.000Z'); // sunday
+
+    expect(utils.isAfter(model, dateAfter)).toBe(true);
+    expect(utils.isBefore(model, dateAfter)).toBe(false);
+  });
+
   it('model is almost same', function(){
-    var dateSimilar =  new Date('2014-06-29T19:00:55.555Z');
+    var dateSimilar =  new Date('2014-06-29T19:00:55.555Z'); // sunday
 
     expect(utils.isSameYear(model, dateSimilar)).toBe(true);
     expect(utils.isSameMonth(model, dateSimilar)).toBe(true);
